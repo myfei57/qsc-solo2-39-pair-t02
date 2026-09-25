@@ -1,0 +1,1 @@
+# The service runs on the CPython standard library only; no third party wheels are required.

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crushplant"
+version = "1.0.0"
+description = "Line control runtime"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+crushplant = "crushplant.cli:run"
+
+[tool.setuptools]
+packages = [
+    "crushplant",
+    "crushplant.audit",
+    "crushplant.belt",
+    "crushplant.chute",
+    "crushplant.cone",
+    "crushplant.console",
+    "crushplant.feeder",
+    "crushplant.jaw",
+    "crushplant.level",
+    "crushplant.line",
+    "crushplant.magnet",
+    "crushplant.ns",
+    "crushplant.safety",
+    "crushplant.screen",
+    "crushplant.stock",
+    "crushplant.store",
+    "crushplant.verdict",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
