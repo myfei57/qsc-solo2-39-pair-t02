@@ -222,14 +222,15 @@ class CrushingLine:
 
         The order here is deliberate.  The crusher state has to be durable, the
         cross component preconditions have to hold, the confirmation has to be
-        live at the current generation, and only then is the setpoint judged and
-        the feeder started.
+        live at the current generation -- and is consumed as it releases this
+        step, so one slip never feeds twice -- and only then is the setpoint
+        judged and the feeder started.
         """
 
         self._require_next("start", "feed")
         self.parts.jaw.require_persisted("feed")
         self.parts.gate.require(moment, actor)
-        slip = self.parts.gate.require_confirmation(moment)
+        slip = self.parts.gate.consume_confirmation(moment, actor)
         verdict = self.parts.gate.judge(target_tph, moment)
         state = self.parts.feeder.start(target_tph, moment, actor)
         stage = self.parts.machine.complete_start_stage("feed", moment, actor)

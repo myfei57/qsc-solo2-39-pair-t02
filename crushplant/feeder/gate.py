@@ -111,11 +111,27 @@ class FeedGate:
         )
         guard("feed", checks)
 
-    def require_confirmation(self, moment: datetime) -> dict[str, Any]:
-        """Demand a live confirmation slip for this generation."""
+    def consume_confirmation(self, moment: datetime, actor: str) -> dict[str, Any]:
+        """Demand a live slip for this generation and burn it as it is used.
+
+        A confirmation releases exactly one feed step: the slip is redeemed
+        against the live generation before the feeder may move, and the
+        redemption is written down with the actor who spent it.
+        """
 
         slip = self._confirmations.require(self.subject, self._generations.generation(), moment)
-        return slip.as_dict()
+        redeemed = self._confirmations.redeem(slip.slip_id, moment, actor)
+        self._ledger.record(
+            self.unit,
+            "gate.confirm-redeem",
+            OUTCOME_OK,
+            actor,
+            moment,
+            subject=self.subject,
+            slip_id=redeemed.slip_id,
+            generation=redeemed.generation,
+        )
+        return redeemed.as_dict()
 
     def issue_confirmation(
         self,
@@ -125,7 +141,7 @@ class FeedGate:
         *,
         target_tph: float | None = None,
     ) -> dict[str, Any]:
-        """Issue the slip that ``require_confirmation`` will look for."""
+        """Issue the slip that ``consume_confirmation`` will look for."""
 
         conditions: dict[str, Any] = {"unit": self.unit}
         if target_tph is not None:
